@@ -364,7 +364,7 @@ When using the `STAGE` deployment strategy, an update plan will initially pause 
 Enter the `continue` command to execute the first block:
 
     $ curl -X PUT -H "Authorization: token=$AUTH_TOKEN" "$DCOS_URI/service/kafka/v1/plan?cmd=continue"
-    PUT $DCOS_URI/service/kafka/v1/plan?cmd=continue HTTP/1.1
+    PUT $DCOS_URI/service/kafka/v1/plan/continue HTTP/1.1
 
     {
         "Result": "Received cmd: continue"
@@ -430,7 +430,7 @@ After you execute the continue operation, the plan will look like this:
 If you enter `continue` a second time, the rest of the plan will be executed without further interruption. If you want to interrupt a configuration update that is in progress, enter the `interrupt` command:
 
     $ curl -X PUT -H "Authorization: token=$AUTH_TOKEN"  "$DCOS_URI/service/kafka/v1/plan?cmd=interrupt"
-    PUT $DCOS_URI/service/kafka/v1/plan?cmd=interrupt HTTP/1.1
+    PUT $DCOS_URI/service/kafka/v1/plan/interrupt HTTP/1.1
 
     {
         "Result": "Received cmd: interrupt"
