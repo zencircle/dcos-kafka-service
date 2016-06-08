@@ -23,7 +23,7 @@
             }
           ],
           "kind":"executable",
-          "url":"{{artifact-dir}}/cli/darwin/dcos-kafka"
+          "url":"{{artifact-dir}}/cli/darwin/dcos_kafka"
         }
       },
       "linux":{
@@ -35,7 +35,7 @@
             }
           ],
           "kind":"executable",
-          "url":"{{artifact-dir}}/cli/linux/dcos-kafka"
+          "url":"{{artifact-dir}}/cli/linux/dcos_kafka"
         }
       }
     }
