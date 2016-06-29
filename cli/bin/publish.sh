@@ -10,3 +10,4 @@ export S3_URL="s3://downloads.mesosphere.io/kafka/assets/${VERSION}/cli/${PLATFO
 
 make clean binary
 aws s3 cp dist/dcos-kafka "${S3_URL}"
+sha256sum dist/dcos-kafka
