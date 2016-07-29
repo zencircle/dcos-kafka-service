@@ -23,7 +23,7 @@ __fwk = None
 
 
 def get_fwk_name():
-    return __fwk or util.get_config().get('kafka.service_name') or "kafka"
+    return __fwk or util.get_config().get('confluent-kafka.service_name') or "confluent-kafka"
 
 
 def set_fwk_name(name):

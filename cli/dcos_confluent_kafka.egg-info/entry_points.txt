@@ -1,0 +1,3 @@
+[console_scripts]
+dcos-confluent-kafka = dcos_kafka.cli:main
+

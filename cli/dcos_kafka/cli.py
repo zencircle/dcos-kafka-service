@@ -27,12 +27,12 @@ def cli():
     pass
 
 
-@cli.group(invoke_without_command=True)
+@cli.group(name="confluent-kafka", invoke_without_command=True)
 @click.option('--info/--no-info', default=False)
 @click.option('--name', help='Name of the Kafka instance to query')
 @click.option('--config-schema',
-              help='Prints the config schema for kafka.', is_flag=True)
-def kafka(info, name, config_schema):
+              help='Prints the config schema for confluent.', is_flag=True)
+def confluent(info, name, config_schema):
     """CLI Module for interaction with a DCOS Kafka service"""
     if info:
         print("Deploy and manage Kafka clusters")
@@ -50,12 +50,12 @@ def print_schema():
     print(schema)
 
 
-@kafka.command()
+@confluent.command()
 def help():
-    print("Usage: dcos kafka --help")
+    print("Usage: dcos confluent --help")
 
 
-@kafka.command()
+@confluent.command()
 @click.option('--address', is_flag=True)
 @click.option('--dns', is_flag=True)
 def connection(address, dns):
@@ -71,7 +71,7 @@ def connection(address, dns):
         connection_api.connection_dns()
 
 
-@kafka.group()
+@confluent.group()
 @click.option('--name', help='Name of the Kafka instance to query')
 def broker(name):
     """Kafka Broker maintenance"""
@@ -99,7 +99,7 @@ def replace(broker_id):
     broker_api.replace(broker_id)
 
 
-@kafka.group()
+@confluent.group()
 @click.option('--name', help='Name of the Kafka instance to query')
 def config(name):
     """Service configuration maintenance"""
@@ -132,7 +132,7 @@ def target():
     commons_api.configuration_show_target()
 
 
-@kafka.group()
+@confluent.group()
 @click.option('--name', help='Name of the Kafka instance to query')
 def plan(name):
     """Rollout plan maintenance"""
@@ -177,7 +177,7 @@ def restart_plan():
     commons_api.plan_cmd_restart()
 
 
-@kafka.group()
+@confluent.group()
 @click.option('--name', help='Name of the Kafka instance to query')
 def state(name):
     """Framework persisted state maintenance"""
@@ -211,7 +211,7 @@ def status(name):
     commons_api.state_task_status(name)
 
 
-@kafka.group()
+@confluent.group()
 @click.option('--name', help='Name of the Kafka instance to query')
 def topic(name):
     """Kafka Topic maintenance"""
