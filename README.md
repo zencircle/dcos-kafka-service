@@ -208,17 +208,6 @@ Installing multiple Kafka clusters is identical to installing Kafka clusters wit
 
     $ dcos package install kafka --options=kafka1.json
 
-## Running Integration Tests
-
-The Kafka framework uses [Shakedown](https://github.com/dcos/shakedown) for specifying integration tests against a DC/OS cluster. The environment setup logic is specified in `integration/run.sh`, which relies for now on the `dcos-tests` repo having been cloned into this one. The `shakedown` test suite is easily run manually if you have a DC/OS cluster already on hand. In this case, you need only install `shakedown` and its dependencies into a virtualenv and then run it with your DC/OS cluster URL as a command-line argument:
-
-    $ cd integration
-    $ virtualenv -p python3.5 env
-    $ source env/bin/activate
-    (env) $ pip install -r requirements.txt
-    (env) $ shakedown --dcos-url $(dcos config show core.dcos_url) --ssh-key-file $CLUSTER_KEY_FILE tests/
-
-
 ## Uninstall
 
 Uninstalling a cluster is straightforward. Replace `name` with the name of the kafka instance to be uninstalled.
@@ -781,7 +770,7 @@ The response, for both the CLI and the REST API is as below.
         }
 
 
-This JSON array contains a list of valid brokers that the client can use to connect to the Kafka cluster. For availability reasons, it is best to specify multiple brokers in configuration of the client.
+This JSON array contains a list of valid brokers that the client can use to connect to the Kafka cluster. For availability reasons, it is best to specify multiple brokers in configuration of the client. Use the VIP to address any one of the Kafka brokers in the cluster.
 
 ## Configuring the Kafka Client Library
 
