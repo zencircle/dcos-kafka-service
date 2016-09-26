@@ -542,7 +542,7 @@ Kafka service allows configuration of JVM Heap Size for the broker JVM process. 
 
 ### Alternate Zookeeper 
 
-By default the Kafka framework uses the Zookeeper ensemble made available on the Mesos masters of a DC/OS cluster. You can configure an alternate Zookeeper installationat install time.
+By default the Kafka framework uses the Zookeeper ensemble made available on the Mesos masters of a DC/OS cluster. You can configure an alternate Zookeeper installation at install time.
 
 To configure it:
 * **DC/OS CLI options.json**:
