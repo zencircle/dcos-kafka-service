@@ -6,15 +6,11 @@ import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.java8.Java8Bundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -234,25 +230,6 @@ public final class Overrider extends Application<DropwizardConfiguration> {
   }
 
   private static String getIp() {
-    try {
-      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      CommandLine commandline = CommandLine.parse("/opt/mesosphere/bin/detect_ip");
-      DefaultExecutor exec = new DefaultExecutor();
-      PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
-      exec.setStreamHandler(streamHandler);
-
-      log.info("Getting ip with command: " + commandline);
-      if (exec.isFailure(exec.execute(commandline))) {
-        log.error("Got error code when executing: " + commandline.toString());
-        return null;
-      } else {
-        String ip = outputStream.toString().trim();
-        log.info("Got ip: " + ip);
-        return ip;
-      }
-    } catch (Exception ex) {
-      log.error("Failed to detect ip address with exception: " + ex);
-      return null;
-    }
+    return System.getenv("LIBPROCESS_IP");
   }
 }
