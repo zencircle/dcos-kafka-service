@@ -22,7 +22,7 @@ public class ClusterState {
 
     public ClusterState(DcosCluster dcosCluster) {
         this.dcosCluster = dcosCluster;
-        this.capabilities = new Capabilities(dcosCluster);
+        this.capabilities = new Capabilities(this.dcosCluster);
     }
 
     public Capabilities getCapabilities() {

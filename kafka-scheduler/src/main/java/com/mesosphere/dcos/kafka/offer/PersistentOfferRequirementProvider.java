@@ -340,22 +340,21 @@ public class PersistentOfferRequirementProvider implements KafkaOfferRequirement
                     containerPath));
         }
 
-        try {
-            if (clusterState.getCapabilities().supportsNamedVips()) {
-                DiscoveryInfo discoveryInfo = DiscoveryInfo.newBuilder()
-                        .setVisibility(DiscoveryInfo.Visibility.EXTERNAL)
-                        .setName(brokerName)
-                        .setPorts(Ports.newBuilder()
-                                .addPorts(Port.newBuilder()
-                                        .setNumber((int) (long) port)
-                                        .setProtocol("tcp")
-                                        .setLabels(labels("VIP_" + UUID.randomUUID(), "broker:9092")))
-                                .build())
-                        .build();
-                taskBuilder.setDiscovery(discoveryInfo);
-            }
-        } catch (Exception e) {
-            log.error("Error querying for named vip support. Named VIP support will be unavailable.", e);
+        if (clusterState.getCapabilities().supportsNamedVips()) {
+            log.info("Named VIPs are supported.");
+            DiscoveryInfo discoveryInfo = DiscoveryInfo.newBuilder()
+                    .setVisibility(DiscoveryInfo.Visibility.EXTERNAL)
+                    .setName(brokerName)
+                    .setPorts(Ports.newBuilder()
+                            .addPorts(Port.newBuilder()
+                                    .setNumber((int) (long) port)
+                                    .setProtocol("tcp")
+                                    .setLabels(labels("VIP_" + UUID.randomUUID(), "broker:9092")))
+                            .build())
+                    .build();
+            taskBuilder.setDiscovery(discoveryInfo);
+        } else {
+            log.info("Named VIPs are not supported.");
         }
 
         KafkaHealthCheckConfiguration healthCheckConfiguration = config.getHealthCheckConfiguration();

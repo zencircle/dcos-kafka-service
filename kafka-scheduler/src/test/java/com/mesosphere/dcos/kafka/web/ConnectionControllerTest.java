@@ -54,7 +54,6 @@ public class ConnectionControllerTest {
         when(capabilities.supportsNamedVips()).thenReturn(true);
         controller = new ConnectionController(
                 ZOOKEEPER_ENDPOINT,
-                mockKafkaConfigState,
                 mockKafkaState,
                 clusterState,
                 FRAMEWORK_NAME);
@@ -90,14 +89,6 @@ public class ConnectionControllerTest {
     @Test
     public void testGetConnectionInfoBrokerListFails() throws Exception {
         when(mockKafkaState.getBrokerEndpoints()).thenThrow(new IllegalArgumentException("hi"));
-        Response response = controller.getConnectionInfo();
-        assertEquals(500, response.getStatus());
-    }
-
-    @Test
-    public void testGetConnectionInfoTargetConfigFails() throws Exception {
-        when(mockKafkaState.getBrokerEndpoints()).thenReturn(BROKER_ENDPOINTS);
-        when(mockKafkaConfigState.getTargetConfig()).thenThrow(new ConfigStoreException("hello"));
         Response response = controller.getConnectionInfo();
         assertEquals(500, response.getStatus());
     }
@@ -150,13 +141,6 @@ public class ConnectionControllerTest {
         assertEquals(2, jsonDns.length());
         assertEquals(BROKER_DNS_ENDPOINT_1, jsonDns.get(0));
         assertEquals(BROKER_DNS_ENDPOINT_2, jsonDns.get(1));
-    }
-
-    @Test
-    public void testGetConnectionDNSInfoTargetConfigFails() throws Exception {
-        when(mockKafkaConfigState.getTargetConfig()).thenThrow(new ConfigStoreException("hello"));
-        Response response = controller.getConnectionDNSInfo();
-        assertEquals(500, response.getStatus());
     }
 
     @Test

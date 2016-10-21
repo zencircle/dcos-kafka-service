@@ -77,7 +77,6 @@ public class KafkaScheduler implements Scheduler, Runnable {
     private final AtomicReference<RecoveryStatus> recoveryStatusRef;
     private final DefaultPlan installPlan;
     private final PersistentOfferRequirementProvider offerRequirementProvider;
-    private final Environment environment;
     private final KafkaSchedulerConfiguration kafkaSchedulerConfiguration;
     private PlanManager planManager;
     private DefaultPlanScheduler planScheduler;
@@ -88,7 +87,6 @@ public class KafkaScheduler implements Scheduler, Runnable {
 
     public KafkaScheduler(KafkaSchedulerConfiguration configuration, Environment environment) throws ConfigStoreException, URISyntaxException {
         this.kafkaSchedulerConfiguration = configuration;
-        this.environment = environment;
         ConfigStateUpdater configStateUpdater = new ConfigStateUpdater(configuration);
         List<String> stageErrors = new ArrayList<>();
         KafkaSchedulerConfiguration targetConfigToUse;
@@ -151,7 +149,6 @@ public class KafkaScheduler implements Scheduler, Runnable {
         Collection<Object> resources = new ArrayList<>();
         resources.add(new ConnectionController(
                 kafkaSchedulerConfiguration.getFullKafkaZookeeperPath(),
-                getConfigState(),
                 getKafkaState(),
                 new ClusterState(new DcosCluster()),
                 kafkaSchedulerConfiguration.getZookeeperConfig().getFrameworkName()));

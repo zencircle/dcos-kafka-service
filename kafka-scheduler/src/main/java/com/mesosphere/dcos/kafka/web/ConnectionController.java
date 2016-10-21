@@ -1,7 +1,6 @@
 package com.mesosphere.dcos.kafka.web;
 
 import com.mesosphere.dcos.kafka.commons.state.KafkaState;
-import com.mesosphere.dcos.kafka.config.KafkaConfigState;
 import com.mesosphere.dcos.kafka.state.ClusterState;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,16 +25,13 @@ public class ConnectionController {
     private final String frameworkName;
     private final KafkaState state;
     private final ClusterState clusterState;
-    private final KafkaConfigState configState;
 
     public ConnectionController(
             String zookeeperEndpoint,
-            KafkaConfigState configState,
             KafkaState state,
             ClusterState clusterState,
             String frameworkName) {
         this.zookeeperEndpoint = zookeeperEndpoint;
-        this.configState = configState;
         this.state = state;
         this.clusterState = clusterState;
         this.frameworkName = frameworkName;
@@ -49,16 +45,15 @@ public class ConnectionController {
             connectionInfo.put(ZOOKEEPER_KEY, zookeeperEndpoint);
             connectionInfo.put(ADDRESS_KEY, getBrokerList());
             connectionInfo.put(DNS_KEY, getBrokerDNSList());
-            try {
-                if (clusterState.getCapabilities().supportsNamedVips()) {
-                    connectionInfo.put(VIP_KEY, String.format("broker.%s.l4lb.thisdcos.directory:9092", frameworkName));
-                }
-            } catch (Exception e) {
-                log.info("Unable to query for named VIP support.", e);
+            if (clusterState.getCapabilities().supportsNamedVips()) {
+                log.info("Named VIPs are supported.");
+                connectionInfo.put(VIP_KEY, String.format("broker.%s.l4lb.thisdcos.directory:9092", frameworkName));
+            } else {
+                log.info("Named VIPs are not supported.");
             }
             return Response.ok(connectionInfo.toString(), MediaType.APPLICATION_JSON).build();
         } catch (Exception ex) {
-            log.error("Failed to fetch topics with exception: " + ex);
+            log.error("Failed to construct /connection response", ex);
             return Response.serverError().build();
         }
     }
@@ -71,7 +66,7 @@ public class ConnectionController {
             connectionInfo.put(ADDRESS_KEY, getBrokerList());
             return Response.ok(connectionInfo.toString(), MediaType.APPLICATION_JSON).build();
         } catch (Exception ex) {
-            log.error("Failed to fetch topics with exception: " + ex);
+            log.error("Failed to construct /connection/address response", ex);
             return Response.serverError().build();
         }
     }
@@ -84,7 +79,7 @@ public class ConnectionController {
             connectionInfo.put(DNS_KEY, getBrokerDNSList());
             return Response.ok(connectionInfo.toString(), MediaType.APPLICATION_JSON).build();
         } catch (Exception ex) {
-            log.error("Failed to fetch topics with exception: " + ex);
+            log.error("Failed to construct /connection/dns response", ex);
             return Response.serverError().build();
         }
     }
@@ -94,8 +89,6 @@ public class ConnectionController {
     }
 
     private JSONArray getBrokerDNSList() throws Exception {
-        final String frameworkName =
-                configState.getTargetConfig().getServiceConfiguration().getName();
         return new JSONArray(state.getBrokerDNSEndpoints());
     }
 }
