@@ -6,7 +6,8 @@ import shakedown
 import tests.test_utils as test_utils
 
 
-STATIC_PORT_OPTIONS_FILE = os.path.join('options', 'static_port.json')
+def setup_module(module):
+    test_utils.uninstall()
 
 
 def teardown_module(module):
@@ -15,14 +16,11 @@ def teardown_module(module):
 
 @pytest.fixture
 def static_port_config():
-    shakedown.install_package_and_wait(
-        test_utils.PACKAGE_NAME,
-        options_file=test_utils.STATIC_PORT_OPTIONS_FILE
-    )
+    test_utils.install(test_utils.STATIC_PORT_OPTIONS_DICT)
 
 
 @pytest.mark.sanity
-@pytest.mark.timeout(120)
+@pytest.mark.timeout(600)
 def test_failing_health_check(static_port_config):
     broker_id = '0'
     broker_name = 'broker-' + broker_id
