@@ -50,7 +50,7 @@ enterprise: 'no'
         
         core@ip-10-0-6-153 ~ $ docker run -it mesosphere/kafka-client
         
-        root@7d0aed75e582:/bin# echo "Hello, World." | ./kafka-console-producer.sh --broker-list broker-0.kafka.mesos:9843, broker-1.kafka.mesos:10056, broker-2.kafka.mesos:9689 --topic topic1
+        root@7d0aed75e582:/bin# echo "Hello, World." | ./kafka-console-producer.sh --broker-list broker.kafka.l4lb.thisdcos.directory:9092 --topic topic
         
         root@7d0aed75e582:/bin# ./kafka-console-consumer.sh --zookeeper master.mesos:2181/dcos-service-kafka --topic topic1 --from-beginning
         Hello, World.
