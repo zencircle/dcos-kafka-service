@@ -10,6 +10,7 @@ import com.mesosphere.dcos.kafka.state.ClusterState;
 import com.mesosphere.dcos.kafka.state.FrameworkState;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.mesos.Protos;
 import org.apache.mesos.Protos.*;
 import org.apache.mesos.Protos.Value.Range;
 import org.apache.mesos.config.ConfigStoreException;
@@ -64,15 +65,57 @@ public class PersistentOfferRequirementProvider implements KafkaOfferRequirement
         String principal = config.getServiceConfiguration().getPrincipal();
         String logdir = containerPath + "/" + OfferUtils.brokerIdToTaskName(brokerId);
 
-        ExecutorInfo executorInfo = ExecutorInfo.newBuilder()
+
+        ExecutorInfo.Builder executorInfoBuilder = ExecutorInfo.newBuilder()
                 .setName(OfferUtils.brokerIdToTaskName(brokerId))
                 .setExecutorId(ExecutorID.newBuilder().setValue("").build()) // Set later by ExecutorRequirement
                 .setFrameworkId(schedulerState.getStateStore().fetchFrameworkId().get())
                 .setCommand(getExecutorCmd(config, configName, brokerId, logdir, port))
                 .addResources(ResourceUtils.getDesiredScalar(role, principal, "cpus", executorConfiguration.getCpus()))
                 .addResources(ResourceUtils.getDesiredScalar(role, principal, "mem", executorConfiguration.getMem()))
-                .addResources(DynamicPortRequirement.getDesiredDynamicPort("API_PORT", role, principal))
-                .build();
+                .addResources(DynamicPortRequirement.getDesiredDynamicPort("API_PORT", role, principal));
+
+        //TODO(secrets hack)
+        String directive = System.getenv("KAFKA_SECRETS_DIRECTIVE");
+        if ( directive != null && directive.length() > 0) {
+            StringBuilder tmp = new StringBuilder();
+            boolean inString=false;
+            for (int i=0; i < directive.length(); i++){
+                // I know it is bad, I was in a rush to experiment
+                if (Character.isWhitespace(directive.charAt(i))) {
+                    continue;
+                }
+                if (directive.charAt(i) != '{'
+                        && directive.charAt(i) != '}'
+                        && directive.charAt(i) != '['
+                        && directive.charAt(i) != ']'
+                        && directive.charAt(i) != ','
+                        && directive.charAt(i) != ':'){
+                    if (inString == false) {
+                        tmp.append("\"");
+                        inString=true;
+                    }
+                } else {
+                    if (inString == true) {
+                        tmp.append("\"");
+                        inString = false;
+                    }
+                }
+                tmp.append(directive.charAt(i));
+            }
+            // I do not understand what is happening when this string is passed from universe?
+            String newDirective = tmp.toString();
+            log.info("EXPERIMENTAL:" + directive + " \n\t\t --->   " + newDirective);
+
+            Protos.Label secretDirectiveLabel = Label.newBuilder()
+                    .setKey("DCOS_SECRETS_DIRECTIVE")
+                    .setValue(newDirective).build();
+            executorInfoBuilder.setLabels(executorInfoBuilder.getLabelsBuilder().addLabels(secretDirectiveLabel));
+            executorInfoBuilder.setLabels(executorInfoBuilder.getLabelsBuilder()
+                    .addLabels(Label.newBuilder().setKey("DCOS_SPACE").setValue("/kafka")));
+        }
+
+        ExecutorInfo executorInfo = executorInfoBuilder.build();
 
         log.info(String.format("Got new OfferRequirement: TaskInfo: '%s' ExecutorInfo: '%s'",
                 TextFormat.shortDebugString(taskInfo),
@@ -313,6 +356,47 @@ public class PersistentOfferRequirementProvider implements KafkaOfferRequirement
         }
         taskBuilder.addResources(ResourceUtils.getDesiredRanges(role, principal, "ports", portRanges));
 
+        //TODO(secrets hack)
+        String directive = System.getenv("KAFKA_SECRETS_DIRECTIVE");
+        if ( directive != null && directive.length() > 0) {
+            StringBuilder tmp = new StringBuilder();
+            boolean inString=false;
+            for (int i=0; i < directive.length(); i++){
+                // I know it is bad, I was in a rush to experiment
+                if (Character.isWhitespace(directive.charAt(i))) {
+                    continue;
+                }
+                if (directive.charAt(i) != '{'
+                            && directive.charAt(i) != '}'
+                            && directive.charAt(i) != '['
+                            && directive.charAt(i) != ']'
+                            && directive.charAt(i) != ','
+                            && directive.charAt(i) != ':'){
+                        if (inString == false) {
+                            tmp.append("\"");
+                            inString=true;
+                        }
+                } else {
+                        if (inString == true) {
+                            tmp.append("\"");
+                            inString = false;
+                        }
+                }
+                tmp.append(directive.charAt(i));
+            }
+            // I do not understand what is happening when this string is passed from universe?
+            String newDirective = tmp.toString();
+            log.info("EXPERIMENTAL:" + directive + " \n\t\t --->   " + newDirective);
+
+            Protos.Label secretDirectiveLabel = Label.newBuilder()
+                    .setKey("DCOS_SECRETS_DIRECTIVE")
+                    .setValue(newDirective).build();
+            taskBuilder.setLabels(taskBuilder.getLabelsBuilder().addLabels(secretDirectiveLabel));
+            taskBuilder.setLabels(taskBuilder.getLabelsBuilder()
+                    .addLabels(Label.newBuilder().setKey("DCOS_SPACE").setValue("/kafka")));
+        }
+
+
         if (brokerConfiguration.getDiskType().equals("MOUNT")) {
             taskBuilder.addResources(ResourceUtils.getDesiredMountVolume(
                     role,
@@ -365,7 +449,18 @@ public class PersistentOfferRequirementProvider implements KafkaOfferRequirement
                 "export JAVA_HOME=$(ls -d $MESOS_SANDBOX/jre*/)", // find directory that starts with "jre"
                 "export PATH=$JAVA_HOME/bin:$PATH",
                 "env",
+                " ( if [ -z $KAFKA_SECRETS_INIT_SCRIPT_CONTENT ] ; " +
+                        "then echo \"KAFKA_SECRETS_INIT_SCRIPT_CONTENT is not set or it is empty\" ; " +
+                        "else echo \"KAFKA_SECRETS_INIT_SCRIPT_CONTENT is set\" ; " +
+                        "echo $KAFKA_SECRETS_INIT_SCRIPT_CONTENT > $MESOS_SANDBOX/kafka_secrets_init_script.sh ; "
+                        + "fi )",
                 "$MESOS_SANDBOX/overrider/bin/kafka-config-overrider server $MESOS_SANDBOX/overrider/conf/scheduler.yml",
+                String.format(
+                        " ( if [ -e $MESOS_SANDBOX/kafka_secrets_init_script.sh ] ; " +
+                                "then bash -x $MESOS_SANDBOX/kafka_secrets_init_script.sh "+
+                                "$MESOS_SANDBOX/%1$s/config/server.properties ; " +
+                                " fi ) ",
+                        config.getKafkaConfiguration().getKafkaVerName()),
                 String.format(
                         "exec $MESOS_SANDBOX/%1$s/bin/kafka-server-start.sh "+
                                 "$MESOS_SANDBOX/%1$s/config/server.properties ",
@@ -382,6 +477,22 @@ public class PersistentOfferRequirementProvider implements KafkaOfferRequirement
         envMap.put("FRAMEWORK_NAME", config.getServiceConfiguration().getName());
         envMap.put("KAFKA_VER_NAME", config.getKafkaConfiguration().getKafkaVerName());
         envMap.put("KAFKA_ZOOKEEPER_URI", config.getKafkaConfiguration().getKafkaZkUri());
+
+        //TODO(secrets_experiment)
+        /*if (System.getenv("KAFKA_SECRETS_DIRECTIVE") != null){
+            // No need to pass this env var, just to know whether secrets are requested or not
+            envMap.put("KAFKA_SECRETS_DIRECTIVE", System.getenv("KAFKA_SECRETS_DIRECTIVE"));
+        }*/
+        if (System.getenv("KAFKA_SECRETS_INIT_SCRIPT_CONTENT") != null){
+            envMap.put("KAFKA_SECRETS_INIT_SCRIPT_CONTENT", System.getenv("KAFKA_SECRETS_INIT_SCRIPT_CONTENT"));
+        }
+        envMap.put("MESOS_MODULES", "{\"libraries\": [{\"file\": \"libdcos_security.so\"," +
+                        " \"modules\": [" +
+                        "{\"name\": \"com_mesosphere_dcos_SecretsIsolator\"}," +
+                        "{\"name\": \"com_mesosphere_dcos_SecretsHook\"}" +
+                        "{\"name\": \"com_mesosphere_dcos_ClassicRPCAuthenticatee\"}" +
+                        " ]}]}");
+
         envMap.put("KAFKA_HEAP_OPTS", String.format("-Xms%1$dM -Xmx%1$dM", config.getBrokerConfiguration().getHeap().getSizeMb()));
         if (config.getBrokerConfiguration().getJmx().isEnabled()) {
             envMap.put("KAFKA_JMX_OPTS", KafkaJmxConfigUtils.toJavaOpts(config.getBrokerConfiguration().getJmx()));
@@ -399,6 +510,7 @@ public class PersistentOfferRequirementProvider implements KafkaOfferRequirement
 
         CommandInfo.Builder cmdBuilder = CommandInfo.newBuilder()
                 .setValue(Joiner.on(" && ").join(Arrays.asList(
+                        "env",
                         "export JAVA_HOME=$(ls -d $MESOS_SANDBOX/jre*/)", // find directory that starts with "jre"
                         "env",
                         "./executor/bin/kafka-executor server ./executor/conf/executor.yml")))

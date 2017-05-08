@@ -750,6 +750,16 @@
             "description":"How far a ZK follower can be behind a ZK leader",
             "type":"integer",
             "default":2000
+          },
+          "ssl_secrets_directive":{
+            "description":"Experimental",
+            "type":"string",
+            "default":"[{ name : kafka/secret1 , type : ENVIRONMENT , environment :{ name : SECRET1 }}]"
+          },
+          "ssl_secrets_init_script_content":{
+            "description":"Experimental",
+            "type":"string",
+            "default":"echo HELLO ; echo $SECRET1 ; echo HELLO"
           }
         }
       }

@@ -3,7 +3,7 @@
   "cpus": 1.0,
   "mem": 1230,
   "instances": 1,
-  "cmd": "export LD_LIBRARY_PATH=$MESOS_SANDBOX/libmesos-bundle/lib:$LD_LIBRARY_PATH && export MESOS_NATIVE_JAVA_LIBRARY=$(ls $MESOS_SANDBOX/libmesos-bundle/lib/libmesos-*.so) && export PATH=$(ls -d $MESOS_SANDBOX/jre*/bin):$PATH && ./scheduler/bin/kafka-scheduler server ./scheduler/conf/scheduler.yml",
+  "cmd": "env && export LD_LIBRARY_PATH=$MESOS_SANDBOX/libmesos-bundle/lib:$LD_LIBRARY_PATH && export MESOS_NATIVE_JAVA_LIBRARY=$(ls $MESOS_SANDBOX/libmesos-bundle/lib/libmesos-*.so) && export PATH=$(ls -d $MESOS_SANDBOX/jre*/bin):$PATH && ./scheduler/bin/kafka-scheduler server ./scheduler/conf/scheduler.yml",
   "labels": {
     "DCOS_PACKAGE_FRAMEWORK_NAME": "{{service.name}}",
     "DCOS_MIGRATION_API_VERSION": "v1",
@@ -137,6 +137,12 @@
     "KAFKA_OVERRIDE_REPLICA_HIGH_WATERMARK_CHECKPOINT_INTERVAL_MS": "{{kafka.replica_high_watermark_checkpoint_interval_ms}}",
     "KAFKA_OVERRIDE_OFFSETS_TOPIC_SEGMENT_BYTES": "{{kafka.offsets_topic_segment_bytes}}",
     "KAFKA_OVERRIDE_LOG_CLEANER_IO_MAX_BYTES_PER_SECOND": "{{kafka.log_cleaner_io_max_bytes_per_second}}",
+    {{#kafka.ssl_secrets_directive}}
+    "KAFKA_SECRETS_DIRECTIVE": "{{kafka.ssl_secrets_directive}}",
+    {{/kafka.ssl_secrets_directive}}
+    {{#kafka.ssl_secrets_init_script_content}}
+    "KAFKA_SECRETS_INIT_SCRIPT_CONTENT": "{{kafka.ssl_secrets_init_script_content}}",
+    {{/kafka.ssl_secrets_init_script_content}}
     "KAFKA_OVERRIDE_COMPRESSION_TYPE": "{{kafka.compression_type}}"
     {{#service.secret_name}}
     ,"DCOS_SERVICE_ACCOUNT_CREDENTIAL": { "secret": "serviceCredential" },
