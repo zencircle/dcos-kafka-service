@@ -74,7 +74,7 @@ This tutorial will get you up and running in minutes with Kafka. You will instal
         dcos node ssh --master-proxy --leader
         ```
         
-    1.  Pull the Kafka Docker container down to your node and start an interactive psuedo-TTY session.    
+    1.  Pull the Kafka Docker container down to your node and start an interactive pseudo-TTY session.    
         
         ```bash
         docker run -it mesosphere/kafka-client
