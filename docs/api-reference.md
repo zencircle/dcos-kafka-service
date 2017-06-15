@@ -32,7 +32,7 @@ The `dcos kafka` CLI commands have a `--name` argument, allowing the user to spe
 
 # Connection Information
 
-Kafka comes with many useful tools of its own that often require either Zookeeper connection information or the list of broker endpoints. This information can be retrieved in an easily consumable format from the `/connection` endpoint:
+Kafka comes with many useful tools of its own that often require either ZooKeeper connection information or the list of broker endpoints. This information can be retrieved in an easily consumable format from the `/connection` endpoint:
 
     curl -H "Authorization: token=$AUTH_TOKEN" "$DCOS_URI/service/kafka/v1/connection"
     GET /service/kafka/v1/connection HTTP/1.1
