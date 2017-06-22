@@ -10,7 +10,7 @@ This tutorial will get you up and running in minutes with Kafka. You will instal
 **Prerequisites:**
 
 -  [DC/OS and DC/OS CLI installed](https://docs.mesosphere.com/1.9/installing/) with a minimum of four agent nodes.
--  Depending on your [security mode](https://docs.mesosphere.com/1.9/overview/security/security-modes/), Kafka requires a service authentication for access to DC/OS. For more information, see [Configuring DC/OS Access for Kafka](https://docs.mesosphere.com/service-docs/kafka/kafka-auth/).
+-  Depending on your [security mode](https://docs.mesosphere.com/1.9/overview/security/security-modes/), Kafka requires service authentication for access to DC/OS. For more information, see [Configuring DC/OS Access for Kafka](https://docs.mesosphere.com/service-docs/kafka/kafka-auth/).
 
    | Security mode | Service Account |
    |---------------|-----------------------|
@@ -46,7 +46,7 @@ This tutorial will get you up and running in minutes with Kafka. You will instal
     dcos kafka connection
     ```
     
-    The output should resemble, where you can see the virtual network, ZooKeeper, brokers, and host IPs:
+    The output should resemble the following, where you can see the virtual network, ZooKeeper, brokers, and host IPs:
     
     ```json
     {
@@ -104,7 +104,7 @@ This tutorial will get you up and running in minutes with Kafka. You will instal
         echo "Hello, World." | ./kafka-console-producer.sh --broker-list broker.kafka.l4lb.thisdcos.directory:9092 --topic topic
         ```
         
-    1.  Start a consumer. Kafka has a command line consumer that will dump out messages to standard output.
+    1.  Start a consumer. Kafka has a command line consumer that will write messages to standard output.
        
         ```bash
         ./kafka-console-consumer.sh --zookeeper master.mesos:2181/dcos-service-kafka --topic topic1 --from-beginning

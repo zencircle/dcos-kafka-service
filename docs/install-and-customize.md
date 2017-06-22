@@ -10,7 +10,7 @@ enterprise: 'no'
 **Prerequisites:**
 
 - [DC/OS and DC/OS CLI installed](https://docs.mesosphere.com/1.9/installing/).
-- Depending on your [security mode](https://docs.mesosphere.com/1.9/overview/security/security-modes/), Kafka requires a service authentication for access to DC/OS. For more information, see [Configuring DC/OS Access for Kafka](https://docs.mesosphere.com/service-docs/kafka/kafka-auth/).
+- Depending on your [security mode](https://docs.mesosphere.com/1.9/overview/security/security-modes/), Kafka requires service authentication for access to DC/OS. For more information, see [Configuring DC/OS Access for Kafka](https://docs.mesosphere.com/service-docs/kafka/kafka-auth/).
   
   | Security mode | Service Account |
   |---------------|-----------------------|
