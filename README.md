@@ -1,3 +1,7 @@
+# DEPRECATED
+
+This repository is now deprecated.  It has been replaced by a new—and significantly improved—version of the framework located in mesospehre/dcos-commons/frameworks/kafka.  This repository will be deleted at the end of 2017.  
+
 # DC/OS Apache Kafka Service Documentation
 
 ## Table of Contents
