@@ -34,8 +34,7 @@ DC/OS Enterprise Edition comes with support for [user ACLs][13]. To interact wit
 
 First, we retrieve `uSeR_t0k3n` with our user credentials and store the token as an environment variable:
 
-    curl --data '{"uid":"username", "password":"password"}' -H "Content-Type:application/json" "$DCOS_URI/acs/api/v1/auth/login"
-    POST /acs/api/v1/auth/login HTTP/1.1
+   curl -ks -H "Content-Type: application/json" -X POST -d '{"uid":"username", "password":"password"}' $DCOS_URI/acs/api/v1/auth/login
     
     {
       "token": "uSeR_t0k3n"
@@ -46,7 +45,7 @@ First, we retrieve `uSeR_t0k3n` with our user credentials and store the token as
 
 Then, use this token to authenticate requests to the Kafka Service:
 
-    curl -H "Authorization: token=$AUTH_TOKEN" "$DCOS_URI/service/kafka/v1/connection"
+    curl -k -H "Authorization: token=$AUTH_TOKEN" "$DCOS_URI/service/kafka/v1/connection"
     GET /service/kafka/v1/connection HTTP/1.1
     
     {
